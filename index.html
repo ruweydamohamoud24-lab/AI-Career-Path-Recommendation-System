@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Path Recommendation System | AI-Powered</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>Career<span class="highlight">AI</span></span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Career Paths</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Training</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="ai-status">
+                    <i class="fas fa-microchip"></i>
+                    <span>AI Model: <span id="aiStatus">Checking...</span></span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-title">
+                    <h1>Career Path Recommendation</h1>
+                    <p>Machine-Learing powered career guidance based on your skills and experience</p>
+                </div>
+                <div class="header-actions">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="user-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>John Doe</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Input Section -->
+            <div class="input-card">
+                <h3><i class="fas fa-edit"></i> Tell us about yourself</h3>
+                <div class="form-group">
+                    <label>Current Job Title</label>
+                    <select id="currentRole" class="form-control">
+                        <option value="">Select your current role...</option>
+                        <option>Software Developer</option>
+                        <option>Junior Developer</option>
+                        <option>Data Analyst</option>
+                        <option>Project Coordinator</option>
+                        <option>IT Support</option>
+                        <option>QA Tester</option>
+                        <option>Business Analyst</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Years of Experience</label>
+                    <input type="number" id="experience" min="0" max="30" class="form-control" placeholder="e.g., 3">
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Skills (comma separated)</label>
+                    <textarea id="skills" rows="3" class="form-control" placeholder="e.g., Python, JavaScript, SQL, Communication, Leadership..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Education Level</label>
+                    <select id="education" class="form-control">
+                        <option value="highschool">High School</option>
+                        <option value="bachelor">Bachelor's Degree</option>
+                        <option value="master">Master's Degree</option>
+                        <option value="phd">PhD</option>
+                        <option value="certification">Professional Certification</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Career Interests (optional)</label>
+                    <select id="interest" class="form-control">
+                        <option value="">Select area of interest...</option>
+                        <option>Technical / Engineering</option>
+                        <option>Management / Leadership</option>
+                        <option>Data / Analytics</option>
+                        <option>Design / Creative</option>
+                        <option>Product / Strategy</option>
+                    </select>
+                </div>
+                
+                <button class="btn-primary" onclick="getRecommendation()">
+                    <i class="fas fa-magic"></i> Get AI Recommendation
+                </button>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="resultsSection" class="results-section" style="display: none;">
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="spinner"></div>
+                    <p>AI is analyzing your profile...</p>
+                </div>
+                
+                <div id="resultsContent"></div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // API URL for PHP backend
+        const API_URL = 'api.php';
+        
+        async function getRecommendation() {
+            // Get form data
+            const currentRole = document.getElementById('currentRole').value;
+            const experience = document.getElementById('experience').value;
+            const skills = document.getElementById('skills').value;
+            const education = document.getElementById('education').value;
+            const interest = document.getElementById('interest').value;
+            
+            // Validation
+            if (!currentRole) {
+                showError('Please select your current role');
+                return;
+            }
+            if (!experience) {
+                showError('Please enter years of experience');
+                return;
+            }
+            if (!skills.trim()) {
+                showError('Please enter your skills');
+                return;
+            }
+            
+            // Show loading
+            const resultsSection = document.getElementById('resultsSection');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            resultsSection.style.display = 'block';
+            loadingOverlay.classList.add('show');
+            
+            // Prepare data
+            const requestData = {
+                current_role: currentRole,
+                experience: parseInt(experience),
+                skills: skills.split(',').map(s => s.trim()),
+                education: education,
+                interest: interest
+            };
+            
+            try {
+                // Send to PHP backend
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                loadingOverlay.classList.remove('show');
+                
+                if (data.success) {
+                    displayResults(data);
+                    updateAIStatus(true);
+                } else {
+                    showError(data.error || 'Something went wrong');
+                }
+            } catch (error) {
+                loadingOverlay.classList.remove('show');
+                showError('Network error. Please check if the server is running.');
+                console.error('Error:', error);
+            }
+        }
+        
+        function displayResults(data) {
+            const container = document.getElementById('resultsContent');
+            
+            container.innerHTML = `
+                <div class="results-header">
+                    <h2><i class="fas fa-chart-line"></i> Your Career Recommendations</h2>
+                    <p>Based on your skills and experience, AI recommends the following paths</p>
+                </div>
+                
+                <div class="career-cards">
+                    ${data.recommendations.map(rec => `
+                        <div class="career-card">
+                            <div class="career-header">
+                                <h3>${rec.career}</h3>
+                                <span class="match-score">${rec.match_score}% Match</span>
+                            </div>
+                            <div class="career-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-chart-simple"></i>
+                                    <span>Growth: ${rec.growth_rate}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>Salary: ${rec.salary_range}</span>
+                                </div>
+                            </div>
+                            <div class="skills-section">
+                                <p><strong>Required Skills:</strong></p>
+                                <div class="skills-tags">
+                                    ${rec.required_skills.map(skill => `
+                                        <span class="skill-tag ${rec.matched_skills?.includes(skill) ? 'matched' : 'missing'}">
+                                            ${skill} ${rec.matched_skills?.includes(skill) ? '✓' : '✗'}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            ${rec.next_level ? `
+                                <div class="next-level">
+                                    <i class="fas fa-arrow-right"></i>
+                                    Next: ${rec.next_level}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="skill-gap-analysis">
+                    <h3><i class="fas fa-chart-simple"></i> Skill Gap Analysis</h3>
+                    <div class="gap-cards">
+                        ${data.gap_analysis.map(gap => `
+                            <div class="gap-card">
+                                <h4>For ${gap.career}</h4>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${gap.match_percentage}%"></div>
+                                </div>
+                                <p>${gap.match_percentage}% match</p>
+                                <p class="missing-skills">
+                                    <strong>Missing skills:</strong> ${gap.missing_skills.join(', ')}
+                                </p>
+                                <div class="training-suggestions">
+                                    <strong>Recommended Training:</strong>
+                                    <ul>
+                                        ${gap.training.map(t => `<li>${t}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="career-roadmap">
+                    <h3><i class="fas fa-map"></i> 5-Year Career Roadmap</h3>
+                    <div class="timeline">
+                        ${data.roadmap.map((step, idx) => `
+                            <div class="timeline-item">
+                                <div class="timeline-marker">${idx + 1}</div>
+                                <div class="timeline-content">
+                                    <h4>${step.title}</h4>
+                                    <p>${step.description}</p>
+                                    <span class="timeline-time">${step.timeline}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Scroll to results
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function showError(message) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContent = document.getElementById('resultsContent');
+            resultsSection.style.display = 'block';
+            resultsContent.innerHTML = `
+                <div class="error-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button onclick="document.getElementById('resultsSection').style.display='none'" class="btn-secondary">Close</button>
+                </div>
+            `;
+        }
+        
+        async function updateAIStatus(isActive) {
+            const statusSpan = document.getElementById('aiStatus');
+            if (isActive) {
+                statusSpan.innerHTML = '<span style="color:#4caf50">● Active</span>';
+            } else {
+                statusSpan.innerHTML = '<span style="color:#ff9800">● Checking...</span>';
+                // Try to check health
+                try {
+                    const response = await fetch(API_URL + '?check=health');
+                    const data = await response.json();
+                    if (data.status === 'ok') {
+                        statusSpan.innerHTML = '<span style="color:#4caf50">● Active</span>';
+                    } else {
+                        statusSpan.innerHTML = '<span style="color:#f44336">● Offline (Using local fallback)</span>';
+                    }
+                } catch {
+                    statusSpan.innerHTML = '<span style="color:#ff9800">● Local Mode (AI connected)</span>';
+                }
+            }
+        }
+        
+        // Check AI status on load
+        updateAIStatus(false);
+    </script>
+</body>
+</html>
