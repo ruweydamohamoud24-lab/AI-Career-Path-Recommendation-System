@@ -73,3 +73,12 @@ A comprehensive multi-subplot Confusion Matrix was generated during the validati
 1.  **Categorical Input Parsing:** Student data (e.g., *Education: Bachelor's, Skills: SQL;Excel;Financial Modeling, Interests: Finance*) is tokenized and expanded into a numerical binary matrix.
 2.  **Probability Weighting:** The trained Random Forest model passes the vector through its optimized decision paths.
 3.  **Dynamic Career Prediction:** The system performs an inverse-label transformation to return the final predicted title to the user interface.
+
+##  Authors (Project Contributors)
+This graduation thesis was collaboratively developed by:
+* **Student 1 Ruweyda Abdullahi Mohamud**
+* **Student 2 Maria Abdullahi Mohamed**
+
+University: Simad University  
+Faculty: Information Technology  
+Academic Year: 2026
